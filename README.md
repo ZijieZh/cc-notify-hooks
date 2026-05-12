@@ -1,6 +1,6 @@
 # cc-notify-hooks
 
-**Claude Code** 与 **Codex CLI** 的分级推送通知系统。支持 **11 个通知渠道**，可作为插件或独立脚本使用，两边共享同一份配置。
+**Claude Code** 与 **Codex CLI** 的分级推送通知系统。支持 **12 个通知渠道**，可作为插件或独立脚本使用，两边共享同一份配置。
 
 ## 为什么需要分级通知？
 
@@ -23,6 +23,7 @@ Claude Code 和 Codex CLI 任务常常需要几秒到几十分钟不等。你不
 | 渠道 | 默认延迟 | 说明 |
 |------|---------|------|
 | **macOS** | 3s | 零配置，系统原生通知 |
+| **Windows** | 5s | 零配置，PowerShell 气泡通知 |
 | **Telegram** | 5s | Bot 消息，手机即时推送 |
 | **Bark** | 15s | iOS / macOS / Android 推送 |
 | **Pushover** | 15s | 跨平台推送服务 |
@@ -53,6 +54,7 @@ notify.sh ── 清除旧 pending → 创建新 pending
     │
     │  ┌── 短通知 ──────────────────────────────────┐
     ├─ │ 3s  → pending 还在？ → macOS 系统通知      │
+    ├─ │ 5s  → pending 还在？ → Windows 通知         │
     ├─ │ 5s  → pending 还在？ → Telegram             │
     ├─ │ 15s → pending 还在？ → Bark / ntfy / ...    │
     │  └────────────────────────────────────────────┘
@@ -69,8 +71,9 @@ notify.sh ── 清除旧 pending → 创建新 pending
 
 ### 依赖
 
-- **jq** — 解析 JSON（`brew install jq` / `apt install jq`）
+- **jq** — 解析 JSON（`brew install jq` / `apt install jq` / [Windows 下载](https://jqlang.github.io/jq/download/)）
 - **curl** — 发送推送（通常已预装）
+- **PowerShell** — Windows 通知依赖（Windows 10/11 已预装）
 
 ### 方式一：Claude Code Marketplace（推荐 Claude 用户）
 
@@ -200,6 +203,16 @@ cp config/notify.example.json ~/.claude/hooks/notify.json
 | 其他字段 | 各渠道的凭证（key、webhook、token 等） |
 
 ### 各渠道凭证
+
+<details>
+<summary><b>Windows</b></summary>
+
+零配置，开箱即用。Windows 10/11 系统通过 PowerShell 的 NotifyIcon 显示右下角气泡通知。
+
+可选配置：
+- `sound` — 提示音，可选值：`Asterisk`、`Beep`、`Exclamation`、`Hand`、`Question`
+
+</details>
 
 <details>
 <summary><b>Bark</b></summary>

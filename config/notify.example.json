@@ -6,6 +6,11 @@
       "sound": "Glass",
       "events": ["notification"]
     },
+    "windows": {
+      "enabled": true,
+      "delay": 5,
+      "events": ["notification"]
+    },
     "bark": {
       "enabled": false,
       "delay": 15,

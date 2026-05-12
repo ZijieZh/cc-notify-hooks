@@ -98,6 +98,19 @@ test_channel() {
 
     # 显示 channel 详情
     case "$name" in
+        windows)
+            echo -e "  ${GREEN}[${name}]${NC} ✅ 已发送，请检查 Windows 右下角气泡通知"
+            ;;
+        macos)
+            if [[ "$(uname -s)" != "Darwin" ]]; then
+                echo -e "  ${YELLOW}[${name}]${NC} ⏭ 非 macOS 系统，跳过"
+                return 0
+            fi
+            source "$ch_file"
+            send_macos "cc-notify-hooks 测试" "推送连通性测试" "$config"
+            echo -e "  ${GREEN}[${name}]${NC} ✅ 已发送，请检查系统通知"
+            return 0
+            ;;
         bark)
             local key
             key=$(echo "$config" | jq -r '.key // empty')

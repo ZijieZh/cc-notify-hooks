@@ -22,7 +22,9 @@ CYAN='\033[0;36m'
 NC='\033[0m'
 
 IS_MACOS=false
+IS_WINDOWS=false
 [[ "$(uname -s)" == "Darwin" ]] && IS_MACOS=true
+[[ "$(uname -s)" =~ ^(MINGW|MSYS|CYGWIN) ]] && IS_WINDOWS=true
 
 echo "========================================="
 echo "  cc-notify-hooks - Claude Code 独立安装"
@@ -64,6 +66,7 @@ echo ""
 # Channel 定义：name|display_name|default_delay|credential_fields
 CHANNEL_DEFS=(
     "macos|macOS 系统通知|3|"
+    "windows|Windows 通知|5|"
     "bark|Bark (iOS/macOS/Android)|15|key:Bark Key;server:Bark Server [https://api.day.app]"
     "telegram|Telegram Bot|5|bot_token:Bot Token;chat_id:Chat ID"
     "pushover|Pushover|15|app_token:App Token;user_key:User Key"
@@ -138,6 +141,9 @@ for def in "${CHANNEL_DEFS[@]}"; do
     if [ "$name" = "macos" ] && $IS_MACOS && [ "$current_enabled" = "false" ] && [ ! -f "$CONFIG_FILE" ]; then
         mark="${GREEN}✓${NC}"
     fi
+    if [ "$name" = "windows" ] && $IS_WINDOWS && [ "$current_enabled" = "false" ] && [ ! -f "$CONFIG_FILE" ]; then
+        mark="${GREEN}✓${NC}"
+    fi
     printf "  %s [%b] %2d. %-30s (默认延迟 %ss)\n" "" "$mark" "$idx" "$display" "$delay"
     idx=$((idx + 1))
 done
@@ -165,9 +171,12 @@ else
             ENABLED_CHANNELS["$name"]=1
         done < <(jq -r '.channels // {} | to_entries[] | select(.value.enabled == true) | .key' "$CONFIG_FILE" 2>/dev/null)
     fi
-    # macOS fallback
+    # macOS/Windows fallback
     if $IS_MACOS && [ ${#ENABLED_CHANNELS[@]} -eq 0 ]; then
         ENABLED_CHANNELS["macos"]=1
+    fi
+    if $IS_WINDOWS && [ ${#ENABLED_CHANNELS[@]} -eq 0 ]; then
+        ENABLED_CHANNELS["windows"]=1
     fi
 fi
 
@@ -237,9 +246,12 @@ for def in "${CHANNEL_DEFS[@]}"; do
     # 构建 channel 对象
     ch_json=$(jq -n --argjson enabled "$enabled" --argjson delay "$delay" '{enabled: $enabled, delay: $delay}')
 
-    # macOS 特殊字段
+    # macOS/Windows 特殊字段
     if [ "$name" = "macos" ]; then
         ch_json=$(echo "$ch_json" | jq '. + {sound: "Glass", events: ["notification"]}')
+    fi
+    if [ "$name" = "windows" ]; then
+        ch_json=$(echo "$ch_json" | jq '. + {events: ["notification"]}')
     fi
 
     # 添加凭证字段

@@ -32,11 +32,13 @@ fi
 
 # 平台检测
 IS_MACOS=false
+IS_WINDOWS=false
 [[ "$(uname -s)" == "Darwin" ]] && IS_MACOS=true
+[[ "$(uname -s)" =~ ^(MINGW|MSYS|CYGWIN) ]] && IS_WINDOWS=true
 
-# 无配置文件时：macOS 用户仍可用系统通知，其他平台直接退出
+# 无配置文件时：macOS/Windows 用户仍可用系统通知，其他平台直接退出
 if [ -z "$CONFIG_FILE" ]; then
-    if ! $IS_MACOS; then
+    if ! $IS_MACOS && ! $IS_WINDOWS; then
         exit 0
     fi
 fi
@@ -153,10 +155,13 @@ echo "$EVENT_TYPE" > "$PENDING_FILE"
 #  构建发送队列并执行
 # ============================================================
 build_queue() {
-    # 无配置文件时，macOS fallback
+    # 无配置文件时，系统原生通知 fallback
     if [ -z "$CONFIG_FILE" ]; then
         if $IS_MACOS && [ "$EVENT_TYPE" = "notification" ]; then
             echo "macos 3"
+        fi
+        if $IS_WINDOWS && [ "$EVENT_TYPE" = "notification" ]; then
+            echo "windows 5"
         fi
         return
     fi

@@ -25,7 +25,9 @@ BOLD='\033[1m'
 NC='\033[0m'
 
 IS_MACOS=false
+IS_WINDOWS=false
 [[ "$(uname -s)" == "Darwin" ]] && IS_MACOS=true
+[[ "$(uname -s)" =~ ^(MINGW|MSYS|CYGWIN) ]] && IS_WINDOWS=true
 
 echo "========================================="
 echo "  cc-notify-hooks - Codex CLI 独立安装"
@@ -72,6 +74,7 @@ echo ""
 # Channel 定义：name|display_name|default_delay|credential_fields
 CHANNEL_DEFS=(
     "macos|macOS 系统通知|3|"
+    "windows|Windows 通知|5|"
     "bark|Bark (iOS/macOS/Android)|15|key:Bark Key;server:Bark Server [https://api.day.app]"
     "telegram|Telegram Bot|5|bot_token:Bot Token;chat_id:Chat ID"
     "pushover|Pushover|15|app_token:App Token;user_key:User Key"
@@ -159,6 +162,9 @@ else
     if $IS_MACOS && [ ${#ENABLED_CHANNELS[@]} -eq 0 ]; then
         ENABLED_CHANNELS["macos"]=1
     fi
+    if $IS_WINDOWS && [ ${#ENABLED_CHANNELS[@]} -eq 0 ]; then
+        ENABLED_CHANNELS["windows"]=1
+    fi
 fi
 
 echo ""
@@ -224,6 +230,9 @@ for def in "${CHANNEL_DEFS[@]}"; do
 
     if [ "$name" = "macos" ]; then
         ch_json=$(echo "$ch_json" | jq '. + {sound: "Glass", events: ["notification"]}')
+    fi
+    if [ "$name" = "windows" ]; then
+        ch_json=$(echo "$ch_json" | jq '. + {events: ["notification"]}')
     fi
 
     if [ -n "$fields" ]; then
