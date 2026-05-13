@@ -75,6 +75,7 @@ echo ""
 CHANNEL_DEFS=(
     "macos|macOS 系统通知|3|"
     "windows|Windows 通知|5|"
+    "cmux|cmux 终端通知|5|"
     "bark|Bark (iOS/macOS/Android)|15|key:Bark Key;server:Bark Server [https://api.day.app]"
     "telegram|Telegram Bot|5|bot_token:Bot Token;chat_id:Chat ID"
     "pushover|Pushover|15|app_token:App Token;user_key:User Key"
